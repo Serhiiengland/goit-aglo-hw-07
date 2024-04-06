@@ -1,5 +1,5 @@
 from collections import UserDict
-from datetime import datetime
+from datetime import timedelta, datetime
 
 def input_error(func): #декоратор для обробки помилок у функціях
     def wrapper(*args, **kwargs):
@@ -76,11 +76,17 @@ class AddressBook(UserDict): #клас адресної книги
 
     def get_upcoming_birthdays(self):   #отримання списку майбутніх днів народження
         today = datetime.now()
+        
+        if today.weekday() == 6:  #неділя
+            next_monday = today + timedelta(days=1)  #переносяться на наступний понеділок
+        else:
+            next_monday = today + timedelta(days=(7 - today.weekday()))  # Інакше наступний понеділок
+        
         upcoming_birthdays = []
         for record in self.data.values():
             if record.birthday:
-                birthday_date = datetime.strptime(record.birthday.value, "%d.%m.%Y")
-                if today.month == birthday_date.month and today.day <= birthday_date.day <= today.day + 7:
+                birthday_date = datetime.strptime(record.birthday.value, "%d.%m.%Y")  #перевіряємо, чи день народження попадає на наступний тиждень              
+                if next_monday <= birthday_date <= next_monday + timedelta(days=6):
                     upcoming_birthdays.append(f"{record.name}'s birthday on {birthday_date.strftime('%d.%m.%Y')}")
         return upcoming_birthdays
 
